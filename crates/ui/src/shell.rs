@@ -3165,9 +3165,9 @@ impl Shell {
     /// The picker's Diffs card / the `+` menu's Diff row: every click opens a
     /// FRESH diff tab with its own scope/base selection (multiple diff
     /// panels, user request).
-    fn add_diff_surface(&mut self, cx: &mut Context<Self>) {
+    fn add_diff_surface(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let changes = cx.new(|cx| Changes::new(self.state.clone(), cx));
-        self.register_diff_surface(changes, cx);
+        self.register_diff_surface(changes, window, cx);
     }
 
     /// Open or focus a session-owned editor tab. The explorer is independent.
@@ -3312,9 +3312,9 @@ impl Shell {
 
     /// The dedicated History surface. Keeping it as its own tab preserves its
     /// graph/search state while Diff tabs retain their ordinary scope picker.
-    fn add_history_surface(&mut self, cx: &mut Context<Self>) {
+    fn add_history_surface(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         let history = cx.new(|cx| Changes::for_history(self.state.clone(), cx));
-        self.register_diff_surface(history, cx);
+        self.register_diff_surface(history, window, cx);
     }
 
     /// A History row click: the commit opens as its own pinned diff tab
@@ -3322,20 +3322,34 @@ impl Shell {
     fn add_commit_diff_surface(
         &mut self,
         commit: zeron_proto::GitHistoryCommit,
+        window: &mut Window,
         cx: &mut Context<Self>,
     ) {
         let changes = cx.new(|cx| Changes::for_commit(self.state.clone(), commit, cx));
-        self.register_diff_surface(changes, cx);
+        self.register_diff_surface(changes, window, cx);
     }
 
-    fn register_diff_surface(&mut self, changes: Entity<Changes>, cx: &mut Context<Self>) {
+    fn register_diff_surface(
+        &mut self,
+        changes: Entity<Changes>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
         self.diff_seq += 1;
         let id = self.diff_seq;
-        let sub = cx.subscribe(&changes, |this: &mut Self, _, event, cx| match event {
-            ChangesEvent::OpenCommit(commit) => {
-                this.add_commit_diff_surface(commit.clone(), cx);
-            }
-        });
+        let sub =
+            cx.subscribe_in(
+                &changes,
+                window,
+                |this: &mut Self, _, event, window, cx| match event {
+                    ChangesEvent::OpenCommit(commit) => {
+                        this.add_commit_diff_surface(commit.clone(), window, cx);
+                    }
+                    ChangesEvent::OpenFile(path) => {
+                        this.add_file_surface(path.clone(), window, cx);
+                    }
+                },
+            );
         self.diffs.insert(id, changes);
         self.diff_subs.insert(id, sub);
         let key = self.panel_key(cx);
@@ -9584,14 +9598,14 @@ impl Shell {
                     // no longer gates on it (terminals work anywhere).
                     .when(self.space_git_detected(cx), |el| {
                         el.child(row("surface-card-diffs", icons::LIST, "Diffs").on_click(
-                            cx.listener(|this, _, _, cx| {
-                                this.add_diff_surface(cx);
+                            cx.listener(|this, _, window, cx| {
+                                this.add_diff_surface(window, cx);
                             }),
                         ))
                         .child(
                             row("surface-card-history", icons::GIT_BRANCH, "History").on_click(
-                                cx.listener(|this, _, _, cx| {
-                                    this.add_history_surface(cx);
+                                cx.listener(|this, _, window, cx| {
+                                    this.add_history_surface(window, cx);
                                 }),
                             ),
                         )
@@ -10124,8 +10138,8 @@ impl Shell {
                             menu.child(
                                 popover::menu_row(&theme, false, "right-plus-diff")
                                     .id("right-plus-diff-row")
-                                    .on_click(cx.listener(|this, _, _, cx| {
-                                        this.add_diff_surface(cx);
+                                    .on_click(cx.listener(|this, _, window, cx| {
+                                        this.add_diff_surface(window, cx);
                                         this.close_right_plus(cx);
                                     }))
                                     .child(
@@ -10138,8 +10152,8 @@ impl Shell {
                             .child(
                                 popover::menu_row(&theme, false, "right-plus-history")
                                     .id("right-plus-history-row")
-                                    .on_click(cx.listener(|this, _, _, cx| {
-                                        this.add_history_surface(cx);
+                                    .on_click(cx.listener(|this, _, window, cx| {
+                                        this.add_history_surface(window, cx);
                                         this.close_right_plus(cx);
                                     }))
                                     .child(
@@ -10912,7 +10926,9 @@ impl Render for Shell {
                 WorkspaceCommand::New => self.open_new_session(cx),
                 WorkspaceCommand::Resume => self.toggle_command_palette(window, cx),
                 WorkspaceCommand::Settings => self.open_last_settings(cx),
-                WorkspaceCommand::Diff if !self.active_chat.is_empty() => self.add_diff_surface(cx),
+                WorkspaceCommand::Diff if !self.active_chat.is_empty() => {
+                    self.add_diff_surface(window, cx)
+                }
                 WorkspaceCommand::Files if !self.active_chat.is_empty() => {
                     self.add_files_surface(window, cx)
                 }
