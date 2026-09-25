@@ -158,32 +158,29 @@
     text-align: center;
     padding: 88px 32px 56px;
   }
-  h1 {
-    font-size: clamp(38px, 4.8vw, 58px);
-    font-weight: 600;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
+  .hero-copy { max-width: 600px; margin: 0 auto; }
+  /* one paragraph: the bold lead in --ink, the rest in --dim */
+  .hero h1 {
+    font-size: clamp(21px, 2.1vw, 25px);
+    font-weight: 500;
+    letter-spacing: -0.022em;
+    line-height: 1.38;
+    color: var(--dim);
     text-wrap: balance;
   }
-  .hero p.sub {
-    margin: 22px auto 0;
-    max-width: 460px;
-    font-size: 16px;
-    line-height: 1.65;
-    color: var(--dim);
-    text-wrap: pretty;
-  }
+  .hero h1 b { font-weight: 600; color: var(--ink); }
   .hero .cta-row {
-    margin-top: 36px;
+    margin-top: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 12px 20px;
     flex-wrap: wrap;
   }
+  .hero .btn { height: 34px; padding: 0 15px; border-radius: 10px; }
   .cta-ver {
     font-family: var(--mono);
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: var(--faint);
   }
   .all-downloads { font-size: 13.5px; color: var(--dim); transition: color .15s; }
@@ -745,9 +742,9 @@
     .wrap { padding: 0 20px; }
     .nav-inner { height: 56px; }
     .hero-grid { padding: 36px 20px 32px; gap: 44px; }
-    h1 { font-size: clamp(32px, 9vw, 38px); }
-    .hero p.sub { font-size: 15px; }
-    .hero .cta-row { margin-top: 28px; }
+    .hero-grid { text-align: left; }
+    .hero-copy { margin: 0; }
+    .hero .agents, .hero .cta-row, .used-by-logos { justify-content: flex-start; }
     .agents { gap: 22px; margin-bottom: 26px; }
     .agent-icon { width: 20px; height: 20px; }
     .shot { padding: 28px 0 0; }
@@ -795,7 +792,7 @@
 
   <header class="hero">
     <div class="wrap hero-grid">
-      <div>
+      <div class="hero-copy">
         <div class="agents" aria-label="Supported agents">
           <span class="agent-icon" title="Claude Code" style="--icon: url('/assets/icons/claude-mark.svg')"></span>
           <span class="agent-icon" title="Codex" style="--icon: url('/assets/icons/openai-mark.svg')"></span>
@@ -806,11 +803,11 @@
           <span class="agent-icon" title="Devin" style="--icon: url('/assets/icons/devin-mark.svg')"></span>
           <span class="agent-icon" title="OpenCode" style="--icon: url('/assets/icons/opencode-mark.svg')"></span>
         </div>
-        <h1>Access your agents from any device.</h1>
-        <p class="sub">
-          Zeron runs Claude Code, Codex, Grok, Hermes, Pi and more on your
-          machines. You steer them from one window, on any device, live.
-        </p>
+        <h1>
+          <b>Access your agents from any device.</b> Zeron runs Claude Code,
+          Codex, Grok, Hermes, Pi and more on your machines. You steer them
+          from one window, on any device, live.
+        </h1>
         <div class="cta-row">
           <a class="btn" id="hero-download" href="#downloads">Download</a>
           <a class="all-downloads" href="#downloads">All downloads ↓</a>
