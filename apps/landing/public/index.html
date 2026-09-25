@@ -82,11 +82,20 @@
 
   /* ── nav ─────────────────────────────────────────────── */
   nav { position: relative; z-index: 50; }
+  /* logo · section links · actions, with the links truly centered */
   .nav-inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 24px;
     height: 64px;
+  }
+  .nav-sections { display: flex; gap: 28px; font-size: 13.5px; }
+  .nav-sections a { color: var(--dim); transition: color .15s; }
+  .nav-sections a:hover { color: var(--ink); }
+  @media (max-width: 900px) {
+    .nav-inner { grid-template-columns: 1fr auto; }
+    .nav-sections { display: none; }
   }
   .logo {
     display: flex;
@@ -104,14 +113,12 @@
     flex: 0 0 auto;
   }
   nav .links {
-    margin-left: auto;
+    justify-self: end;
     display: flex;
     align-items: center;
     gap: 16px;
     font-size: 13px;
   }
-  .navlink { color: var(--dim); padding: 6px 10px; transition: color .15s; }
-  .navlink:hover { color: var(--ink); }
   .gh-icon {
     display: inline-flex;
     align-items: center;
@@ -232,7 +239,7 @@
   /* every full-width section opens the same way: a centered paragraph,
      bold lead in --ink, the rest in --dim (the hero's voice, smaller) */
   .sec-head { max-width: 560px; margin: 0 auto 48px; text-align: center; }
-  .sec-head p {
+  .sec-head p, .p-copy p {
     font-size: clamp(19px, 1.9vw, 22px);
     font-weight: 500;
     line-height: 1.42;
@@ -240,7 +247,7 @@
     color: var(--dim);
     text-wrap: balance;
   }
-  .sec-head b { font-weight: 600; color: var(--ink); }
+  .sec-head b, .p-copy b { font-weight: 600; color: var(--ink); }
 
   /* ── art plates ──────────────────────────────────────── */
   .plate {
@@ -274,7 +281,7 @@
     width: 100%;
     height: auto;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 14px;
     box-shadow:
       0 30px 100px -30px rgba(0,0,0,0.8),
       0 0 90px -30px rgba(139,92,246,0.35);
@@ -304,9 +311,6 @@
      instead of floating in whitespace */
   .panel-sect { padding-top: var(--sec); position: relative; z-index: 1; }
   .panel-sect > .wrap { position: relative; z-index: 1; }
-  /* transparent: the reach figures show through under the cells; the top
-     and bottom rules run the full page width, the side borders stay at
-     wrap width */
   .panel {
     position: relative;
   }
@@ -332,15 +336,15 @@
     width: 100%;
     height: auto;
     border: 1px solid var(--line-soft);
-    border-radius: 6px;
+    border-radius: 12px;
   }
   .p-gallery figcaption {
-    margin-top: 13px;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.02em;
-    color: var(--faint);
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--dim);
   }
+  .p-gallery figcaption b { font-weight: 600; color: var(--ink); }
 
   .p-harness { display: grid; grid-template-columns: 1.08fr 1fr; }
   .p-diagram {
@@ -429,19 +433,7 @@
     justify-content: center;
     padding: 48px 0;
   }
-  .p-copy h2 {
-    font-size: clamp(21px, 2.4vw, 27px);
-    font-weight: 600;
-    letter-spacing: -0.025em;
-    text-wrap: balance;
-  }
-  .p-copy p {
-    margin-top: 14px;
-    max-width: 400px;
-    font-size: 14px;
-    line-height: 1.65;
-    color: var(--dim);
-  }
+  .p-copy p { max-width: 440px; }
   .p-copy .cta-row { margin-top: 26px; display: flex; gap: 14px; }
 
   /* ── devices flowchart ──────────────────────────────── */
@@ -513,24 +505,6 @@
   @media (prefers-reduced-motion: reduce) {
     .spoke-line, .spoke-accent { animation: none; }
   }
-
-  /* ── reach ascii ─────────────────────────────────────── */
-  /* the reaching-figures relief, rendered through a baked-density glyph
-     field. the two figures flank the panel from the page edges, vertically
-     centered on it and layered underneath, so the arms reach in behind it */
-  .reach-left, .reach-right {
-    position: absolute;
-    /* no-JS fallback; a script re-anchors this to the harness row's center
-       so the figures keep reaching toward it wherever the row sits */
-    top: calc(50% + 55px);
-    transform: translateY(-50%);
-    z-index: 0;
-    height: auto !important;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, #000 16%, #000 84%, transparent 100%);
-  }
-  .reach-left { left: 0; width: min(540px, 44vw) !important; }
-  .reach-right { right: 0; width: min(516px, 42vw) !important; }
 
   /* ── tweets ──────────────────────────────────────────── */
   /* a featured post on an art plate, then a wall of three columns
@@ -616,62 +590,36 @@
      and a list of builds with a button each */
   .downloads { padding-top: var(--sec); position: relative; z-index: 1; }
   .downloads .wrap { scroll-margin-top: 40px; }
-  .dl-rows { border-bottom: 1px solid var(--line-soft); }
-  .dl-row {
+  .dl {
+    max-width: 880px;
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-    gap: 32px;
-    padding: 44px 0;
-    border-top: 1px solid var(--line-soft);
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
   }
-  .dl-lead h3 {
-    font-size: 19px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  .dl-lead p { margin-top: 8px; font-size: 14.5px; line-height: 1.6; color: var(--faint); }
-  .dl-list { list-style: none; }
+  .dl h3 { margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+  .dl-list { list-style: none; border-top: 1px solid var(--line-soft); }
   .dl-list li {
-    display: flex;
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
     align-items: center;
-    gap: 14px;
-    padding: 9px 0;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 14px;
   }
-  .dl-list li + li { border-top: 1px solid var(--line-soft); }
-  .dl-name { font-size: 14px; font-weight: 500; }
-  /* build details in the same mono caption voice as the gallery */
-  .dl-meta {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.02em;
-    color: var(--faint);
-    white-space: nowrap;
-  }
-  .dl-list .btn { margin-left: auto; }
+  .dl-name { font-weight: 600; }
+  .dl-meta { font-size: 13px; color: var(--faint); white-space: nowrap; }
   .dl-list .btn.ghost[aria-disabled="true"] {
     opacity: .4;
     cursor: default;
     pointer-events: none;
   }
-  .dl-soon {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.02em;
-    color: var(--faint);
-  }
-  .download-foot {
-    margin-top: 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    font-size: 12.5px;
-    color: var(--faint);
-  }
+  .download-foot { max-width: 880px; margin: 16px auto 0; font-size: 13px; }
   .download-foot a { color: var(--dim); transition: color .15s; }
   .download-foot a:hover { color: var(--ink); }
-  @media (max-width: 900px) {
-    .dl-row { grid-template-columns: 1fr; gap: 22px; padding: 34px 0; }
+  @media (max-width: 760px) {
+    .dl { grid-template-columns: 1fr; gap: 32px; }
   }
 
   /* ── closing ─────────────────────────────────────────── */
@@ -734,15 +682,14 @@
     .agents { gap: 22px; margin-bottom: 26px; }
     .agent-icon { width: 20px; height: 20px; }
     .shot { padding: 28px 0 0; }
-    .shot img { border-radius: 4px; }
-    .reach-left, .reach-right { display: none; }
+    .shot img { border-radius: 8px; }
     .sec-head { margin-bottom: 32px; text-align: left; }
     .sec-head p { font-size: 18px; }
     .plate-quote { aspect-ratio: auto; padding: 56px 0; }
     .plate-quote p { font-size: 26px; }
     .wall { grid-template-columns: 1fr; height: 520px; }
     .wall-col:nth-child(2) { display: none; }
-    .dl-list li { flex-wrap: wrap; row-gap: 6px; }
+    .dl-list li { grid-template-columns: 70px 1fr auto; }
     .plate-closing { aspect-ratio: auto; padding: 72px 0; }
     /* restate the vertical padding: .wrap's phone padding resets it */
     .foot { grid-template-columns: 1fr; justify-items: center; padding-top: 40px; padding-bottom: 40px; text-align: center; }
@@ -761,6 +708,12 @@
         <img class="logo-mark" src="/assets/zeron-app-icon.png" width="128" height="128" alt="" />
         <span>Zeron</span>
       </a>
+      <div class="nav-sections" aria-label="Sections">
+        <a href="#features">Features</a>
+        <a href="#devices">Devices</a>
+        <a href="#people">Community</a>
+        <a href="https://github.com/zeronsh/zeron/releases">Changelog</a>
+      </div>
       <div class="links">
         <a class="gh-icon" href="https://discord.gg/rnynTdgZ24" aria-label="Discord">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>
@@ -788,8 +741,7 @@
         </div>
         <h1>
           <b>Access your agents from any device.</b> Zeron runs Claude Code,
-          Codex, Grok, Hermes, Pi and more on your machines. You steer them
-          from one window, on any device, live.
+          Codex, Grok, Hermes, Pi and more on your machines.
         </h1>
         <div class="cta-row">
           <a class="btn" id="hero-download" href="#downloads">Download</a>
@@ -814,9 +766,7 @@
     </div>
   </section>
 
-  <section class="panel-sect">
-    <canvas class="reach-left" aria-hidden="true"></canvas>
-    <canvas class="reach-right" aria-hidden="true"></canvas>
+  <section class="panel-sect" id="features">
     <div class="wrap">
     <div class="panel">
       <i class="pdot tl"></i><i class="pdot tr"></i><i class="pdot bl"></i><i class="pdot br"></i>
@@ -871,10 +821,9 @@
           </div>
         </div>
         <div class="p-copy">
-          <h2>Runs what you already use</h2>
-          <p>Zeron is not a new harness. It drives Claude Code, Codex, Cursor,
-             Grok, Hermes and Pi — the same sessions and tools you use each day,
-             in one fast native window on every device.</p>
+          <p><b>Runs what you already use.</b> Zeron is not a new harness. It
+             drives the agents, sessions and tools you use every day, in one
+             fast native window.</p>
           <div class="cta-row">
             <a class="btn ghost" href="https://github.com/zeronsh/comet">Star on GitHub ↗<span class="gh-stars" hidden></span></a>
           </div>
@@ -883,24 +832,22 @@
       <div class="panel-row p-gallery">
         <figure>
           <img src="/assets/shots/sessions.png" alt="Zeron session list showing agent sessions running on another machine" loading="lazy" width="907" height="627" />
-          <figcaption>Every machine's sessions, one list</figcaption>
+          <figcaption><b>Every machine's sessions,</b> one list.</figcaption>
         </figure>
         <figure>
           <img src="/assets/shots/diff.png" alt="Zeron branch diff view with added and removed lines across 299 changed files" loading="lazy" width="907" height="627" />
-          <figcaption>Branch diffs, live as agents work</figcaption>
+          <figcaption><b>Branch diffs,</b> live as agents work.</figcaption>
         </figure>
         <figure>
           <img src="/assets/shots/history.png" alt="Zeron commit history view with a branching commit graph" loading="lazy" width="907" height="627" />
-          <figcaption>Commit history for every workspace</figcaption>
+          <figcaption><b>Commit history</b> for every workspace.</figcaption>
         </figure>
       </div>
-      <div class="panel-row p-devices">
+      <div class="panel-row p-devices" id="devices">
         <div class="p-copy">
-          <h2>Three screens, one session</h2>
-          <p>Sessions live on your machines, every device you own can pilot
-             them. Start Claude Code at your desk, watch it from your phone,
-             approve the diff from the couch. Nothing to hand off, nothing
-             to re-open.</p>
+          <p><b>Three screens, one session.</b> Start Claude Code at your desk,
+             watch it from your phone, approve the diff from the couch. Nothing
+             to hand off.</p>
         </div>
         <div class="p-diagram">
           <div class="flow-wrap" aria-hidden="true">
@@ -1070,26 +1017,20 @@
       <header class="sec-head">
         <p id="downloads-title"><b>Download Zeron.</b> Available for macOS, Windows and Linux. iOS is on the way.</p>
       </header>
-      <div class="dl-rows">
-        <div class="dl-row">
-          <div class="dl-lead">
-            <h3>Zeron for desktop.</h3>
-            <p>macOS, Windows and Linux.</p>
-          </div>
+      <div class="dl">
+        <div>
+          <h3>Zeron for desktop</h3>
           <ul class="dl-list">
-            <li><span class="dl-name">macOS</span><span class="dl-meta">apple silicon · dmg</span><a class="btn ghost small" data-platform-download="macos" href="https://zeron.sh/releases/zeron-0.2.66-macos-arm64.dmg">Download</a></li>
+            <li><span class="dl-name">macOS</span><span class="dl-meta">Apple silicon · dmg</span><a class="btn ghost small" data-platform-download="macos" href="https://zeron.sh/releases/zeron-0.2.66-macos-arm64.dmg">Download</a></li>
             <li><span class="dl-name">Windows</span><span class="dl-meta">x64 · portable zip</span><a class="btn ghost small" data-platform-download="windows" href="https://zeron.sh/releases/zeron-0.2.66-windows-x86_64.zip">Download</a></li>
             <li><span class="dl-name">Linux</span><span class="dl-meta">x64 · tar.gz</span><a class="btn ghost small" data-platform-download="linux" href="https://zeron.sh/releases/zeron-0.2.66-linux-x86_64.tar.gz">Download</a></li>
             <li><span class="dl-name">Linux</span><span class="dl-meta">arm64 · tar.gz</span><a class="btn ghost small" data-platform-download="linux-arm" href="https://zeron.sh/releases/zeron-0.2.66-linux-aarch64.tar.gz">Download</a></li>
           </ul>
         </div>
-        <div class="dl-row">
-          <div class="dl-lead">
-            <h3>Zeron for mobile.</h3>
-            <p>iPhone and iPad.</p>
-          </div>
+        <div>
+          <h3>Zeron for mobile</h3>
           <ul class="dl-list">
-            <li><span class="dl-name">iOS</span><span class="dl-soon">coming soon</span><span class="btn ghost small" role="link" aria-disabled="true">App Store ↗</span></li>
+            <li><span class="dl-name">iOS</span><span class="dl-meta">Coming soon</span><span class="btn ghost small" role="link" aria-disabled="true">App Store ↗</span></li>
           </ul>
         </div>
       </div>
@@ -1195,178 +1136,6 @@
   })();
 </script>
 <script>
-  // Ascii figures: a slow-warping noise field mapped through a glyph
-  // density ramp, shaped by a baked density map of each photo, so the
-  // characters keep flipping organically while the form holds steady.
-  (() => {
-    const CW = 12, CH = 14; // glyph cell
-    const RAMP = [" ", " ", " ", ".", ":", ">", "~", "×", "*", "#"];
-    const HANDS = [
-      { sel: ".reach-left", ox: 293, data: `866642000000410000000000002310000000000022210
-565443200000001100000000000000000000000111111
-564322210000000001200000000000000100000000000
-431001111100000102520220000000000000100000000
-320000000200000464455254310000000000000000000
-100100000000016489988865883000000000010000000
-112100000000008999998874770000000000100000010
-431000000000037999999479810000000010000000000
-320000000000058889979988400000002000000000000
-201000000000026758999977200000000000000000000
-220000000000134569999885000000000000000000001
-000000000101112689999960000000000000000000010
-243330153010002899942410000001000000000000100
-788887895000001699920000000000010000000000000
-899999830000000389840000000000000000000220000
-799999941000000135863200000000000200002221000
-689999997100000000231110000000000002200001000
-779999998400000130000011000000000001000000010
-789999999974200220000027620000000000000000011
-999999999999875440000589520000000000100000000
-989999999998887385423999500000000001000000000
-868999899854000269988799971000000000000000000
-548999988775654206996069887410000000000000000
-446999988888756864870004889985010000000000000
-555899999998624788820000268984010000001000000
-565799998889866789600000001688643333557710220
-676899998777788998100000000049999999998874378
-878999875577346684000000000001366776542059747
-888999851036304463000110000000000000000000257
-999998887101100003210002000000000000000000008
-989999867860100004222100000000010000000000001
-899998865465320025401210000000001110000000000
-999999776335333234541210000000000200000000001
-999889876300232355444211000000002100000000000
-999987888763001125434320000000012000000000000
-999997578885310000233323000002332100000000000
-988898756653210110003435301022133200001000000
-999987665555300000000243445342333310110000003
-999998656765421000000013442323322343212201343
-999999998875453100000002554333433444333224434
-999999998976764211000003455443444455444345442
-999999999899887654201000255556544445545545542` },
-      { sel: ".reach-right", ox: 338, data: `0000122332210000002200001223332333345667889
-1000143101100000000110000111100011234466789
-0012001000000000000002102200000000122234577
-0110000000000000010000231100000000000123554
-0000000000022110121000000000000000023234444
-0000000000210100001100000000000002243234334
-0000000001000000000230000000002232011234434
-0000000120000000000001000000000020000003433
-1000001100000000000000000000000100000011233
-0221200000000000000100000000000000000010455
-0021000000000000000000000000000000000002446
-0000000000000000000000000000000000000033235
-0000000000000000000000110000000000000122223
-0000000000001000000000001000011210000111222
-0000000000000000000000001100000111210021122
-0000000000000000000000011000000001122122213
-0000000010000000000000010000000000001103232
-0000000000000000000000000000000000000013320
-0000000100000000000013000000000000000013222
-2100000000000000000001000000000000111111123
-1010000000000000000000000000000000001000013
-0000000000100000000000000000000000001000013
-0000000000220110100000000000232200310200103
-0000010000012100000000000002315456431000122
-0000000000000011000000000000644786596011212
-0000000000000010000000000000113899888322235
-5300000000000000000010000004025889998332554
-9541000000000000000002000002478999996024334
-8310000000100000001000010000799987985222233
-6400000100000000000000000000017987762000001
-2000000365000000100000000020000999200000000
-0000001477435630000000000000035895000032000
-1000000266888886100010000012036751000037776
-1000000134200048874322433458622200000058999
-0100000000100101589988999999985033000599997
-0110010100001100013466678888798446446999999
-3212101011013101110122123443458999999999999
-2421001001222112221133531322445898878998999
-2311110001323222211344443334555588888899999
-2222111113134333214435345555566679999999999
-3322222242453444344543355555666667999999999
-2433223335554433454543456556566777999999999` },
-    ]
-      .map((h) => {
-        const cv = document.querySelector(h.sel);
-        if (!cv) return null;
-        const grid = h.data.split("\n");
-        return { ...h, cv, ctx: cv.getContext("2d"), grid, cols: grid[0].length, rows: grid.length };
-      })
-      .filter(Boolean);
-    if (!HANDS.length) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    for (const h of HANDS) {
-      h.cv.width = h.cols * CW * dpr;
-      h.cv.height = h.rows * CH * dpr;
-      h.cv.style.width = h.cols * CW + "px";
-      h.cv.style.height = h.rows * CH + "px";
-      h.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      h.ctx.font = '10px "Geist Mono", monospace';
-      h.ctx.textBaseline = "top";
-    }
-    const field = (x, y, t) => {
-      const a = x * 0.55, b = y * 0.35;
-      const v =
-        Math.sin(a + 2.1 * Math.sin(b * 0.9 + t) + t * 0.7) *
-        Math.cos(b - 1.7 * Math.sin(a * 0.6 - t * 0.8));
-      return 0.5 + 0.5 * v;
-    };
-    const draw = (t) => {
-      for (const h of HANDS) {
-        if (h.cv.offsetWidth === 0) continue;
-        h.ctx.clearRect(0, 0, h.cols * CW, h.rows * CH);
-        for (let y = 0; y < h.rows; y++) {
-          for (let x = 0; x < h.cols; x++) {
-            const base = +h.grid[y][x] / 9;
-            if (!base) continue;
-            const v = base * (0.72 + 0.58 * field(x + h.ox, y, t));
-            const g = RAMP[Math.min(RAMP.length - 1, (v * RAMP.length) | 0)];
-            if (g === " ") continue;
-            h.ctx.fillStyle = `rgba(139, 92, 246, ${(0.16 + v * 0.5).toFixed(2)})`;
-            h.ctx.fillText(g, x * CW + 2, y * CH + 2);
-          }
-        }
-      }
-    };
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.fonts.ready.then(() => draw(0));
-    } else {
-      let prev = 0;
-      const tick = (ms) => {
-        if (ms - prev > 66) { // ~15fps: the reference drifts slowly
-          prev = ms;
-          draw(ms * 0.00022);
-        }
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
-  })();
-
-  // keep the reaching figures vertically centered on the harness row —
-  // they point at "Runs what you already use" wherever it sits in the panel
-  (() => {
-    const sect = document.querySelector(".panel-sect");
-    const row = document.querySelector(".p-harness");
-    const figs = document.querySelectorAll(".reach-left, .reach-right");
-    if (!sect || !row || !figs.length) return;
-    const place = () => {
-      const y =
-        row.getBoundingClientRect().top -
-        sect.getBoundingClientRect().top +
-        row.offsetHeight / 2;
-      for (const f of figs) f.style.top = y + "px";
-    };
-    place();
-    addEventListener("resize", place);
-    if (typeof ResizeObserver !== "undefined") {
-      const ro = new ResizeObserver(place);
-      ro.observe(sect);
-      ro.observe(row);
-    }
-    document.fonts.ready.then(place);
-  })();
 </script>
 </body>
 </html>
